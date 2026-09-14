@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Perfusionsrechner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b1220">
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#141f33;
+    --card-border:#25314a;
+    --text:#eef2f8;
+    --text-dim:#9fb0c8;
+    --accent:#3fa9f5;
+    --accent-2:#38d39f;
+    --warn:#f5a623;
+    --danger:#f5546a;
+    --input-bg:#0e1729;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4f6fa;
+      --card:#ffffff;
+      --card-border:#dbe2ee;
+      --text:#101827;
+      --text-dim:#5b6b85;
+      --accent:#1c7ed6;
+      --accent-2:#0f9d6e;
+      --warn:#c97a0a;
+      --danger:#d1364b;
+      --input-bg:#f0f3f8;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    padding:16px 16px calc(40px + env(safe-area-inset-bottom));
+    max-width:560px;
+    margin:0 auto;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:8px 0 4px;
+    letter-spacing:0.02em;
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:0.9rem;
+    margin-bottom:20px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-size:0.95rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--text-dim);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h2 .num{
+    background:var(--accent);
+    color:#fff;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.8rem;
+    font-weight:700;
+  }
+  label{
+    display:block;
+    font-size:0.9rem;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .field{
+    margin-bottom:14px;
+  }
+  .field:last-child{margin-bottom:0;}
+  input[type=text]{
+    width:100%;
+    background:var(--input-bg);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:14px 12px;
+    font-size:1.15rem;
+    color:var(--text);
+    outline:none;
+    font-variant-numeric:tabular-nums;
+  }
+  input[type=text]:focus{
+    border-color:var(--accent);
+  }
+  .row{
+    display:flex;
+    gap:12px;
+  }
+  .row > .field{flex:1;}
+  .unit{
+    font-size:0.85rem;
+    color:var(--text-dim);
+    margin-left:4px;
+  }
+  .result{
+    background:var(--input-bg);
+    border-radius:10px;
+    padding:14px;
+    margin-top:6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .result .label{
+    font-size:0.95rem;
+    color:var(--text-dim);
+  }
+  .result .value{
+    font-size:1.5rem;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .result .value .unit{
+    font-size:0.9rem;
+    font-weight:400;
+  }
+  .result.primary .value{color:var(--accent);}
+  .result.secondary .value{color:var(--accent-2);}
+  .flag{
+    font-size:0.8rem;
+    color:var(--warn);
+    margin-top:8px;
+  }
+  .flag.danger{color:var(--danger);}
+  .sync-note{
+    font-size:0.8rem;
+    color:var(--text-dim);
+    margin-top:6px;
+  }
+  .sync-note button{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-size:0.8rem;
+    padding:0;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  details{
+    margin-top:6px;
+  }
+  summary{
+    color:var(--text-dim);
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  .formula{
+    font-size:0.85rem;
+    color:var(--text-dim);
+    margin-top:8px;
+    line-height:1.5;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .reset{
+    display:block;
+    width:100%;
+    padding:14px;
+    background:none;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    color:var(--text-dim);
+    font-size:1rem;
+    margin-top:4px;
+  }
+  footer{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:0.78rem;
+    margin-top:24px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Perfusionsrechner</h1>
+<div class="subtitle">BSA · Flow · DO2 · Priming · Katecholamine · mmHg/kPa — offline</div>
+
+<div class="card">
+  <h2><span class="num">1</span>Körperoberfläche (BSA)</h2>
+  <div class="row">
+    <div class="field">
+      <label for="height">Größe <span class="unit">cm</span></label>
+      <input type="text" inputmode="decimal" id="height" placeholder="z. B. 175">
+    </div>
+    <div class="field">
+      <label for="weight">Gewicht <span class="unit">kg</span></label>
+      <input type="text" inputmode="decimal" id="weight" placeholder="z. B. 78">
+    </div>
+  </div>
+  <div class="result primary">
+    <span class="label">BSA (DuBois)</span>
+    <span class="value" id="out-bsa">–<span class="unit">m²</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">BSA = 0,007184 × Gewicht<sup>0,425</sup> × Größe<sup>0,725</sup></div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">2</span>Ziel-Pumpenfluss</h2>
+  <div class="field">
+    <label for="ci">Cardiac Index <span class="unit">l/min/m²</span></label>
+    <input type="text" inputmode="decimal" id="ci" value="2,4">
+  </div>
+  <div class="result primary">
+    <span class="label">Ziel-Flow</span>
+    <span class="value" id="out-flow">–<span class="unit">l/min</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">Flow = CI × BSA</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">3</span>Sauerstoffangebot (DO2)</h2>
+  <div class="row">
+    <div class="field">
+      <label for="hb">Hb <span class="unit">g/dl</span></label>
+      <input type="text" inputmode="decimal" id="hb" placeholder="z. B. 10">
+    </div>
+    <div class="field">
+      <label for="sao2">SaO2 <span class="unit">%</span></label>
+      <input type="text" inputmode="decimal" id="sao2" placeholder="z. B. 98">
+    </div>
+  </div>
+  <div class="field">
+    <label for="flow">Pumpenfluss <span class="unit">l/min</span></label>
+    <input type="text" inputmode="decimal" id="flow" placeholder="wird aus Ziel-Flow übernommen">
+    <div class="sync-note" id="sync-note" style="display:none">Manuell geändert. <button id="sync-btn" type="button">↺ Ziel-Flow übernehmen</button></div>
+  </div>
+  <div class="result primary">
+    <span class="label">DO2</span>
+    <span class="value" id="out-do2">–<span class="unit">ml/min</span></span>
+  </div>
+  <div class="result secondary">
+    <span class="label">DO2-Index</span>
+    <span class="value" id="out-do2i">–<span class="unit">ml/min/m²</span></span>
+  </div>
+  <div class="flag danger" id="do2i-flag" style="display:none">⚠ DO2-Index unter dem kritischen Bereich (~270 ml/min/m²)</div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">DO2 = Flow × Hb × 1,34 × SaO2 × 10<br>DO2-Index = DO2 / BSA</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">4</span>Priming-Volumen (erwarteter Hb)</h2>
+  <div class="field">
+    <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
+    <input type="text" inputmode="decimal" id="priming-weight" placeholder="wird aus Abschnitt 1 übernommen">
+    <div class="sync-note" id="priming-weight-sync-note" style="display:none">Manuell geändert. <button id="priming-weight-sync-btn" type="button">↺ Gewicht übernehmen</button></div>
+  </div>
+  <div class="field">
+    <label for="bv-factor">Blutvolumen-Faktor <span class="unit">ml/kg</span></label>
+    <input type="text" inputmode="decimal" id="bv-factor" value="70">
+  </div>
+  <div class="field">
+    <label for="start-hb">Ausgangs-Hb <span class="unit">g/dl</span></label>
+    <input type="text" inputmode="decimal" id="start-hb" placeholder="z. B. 13">
+  </div>
+  <div class="field">
+    <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
+    <input type="text" inputmode="decimal" id="priming-vol" placeholder="z. B. 1400">
+  </div>
+  <div class="result">
+    <span class="label">Geschätztes Blutvolumen</span>
+    <span class="value" id="out-ebv">–<span class="unit">ml</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Erwarteter Hb</span>
+    <span class="value" id="out-priming-hb">–<span class="unit">g/dl</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">5</span>Katecholamine</h2>
+  <div class="row">
+    <div class="field">
+      <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
+      <input type="text" inputmode="decimal" id="cat-mg" placeholder="z. B. 5">
+    </div>
+    <div class="field">
+      <label for="cat-vol">Spritzenvolumen <span class="unit">ml</span></label>
+      <input type="text" inputmode="decimal" id="cat-vol" value="50">
+    </div>
+  </div>
+  <div class="field">
+    <label for="cat-rate">Laufrate <span class="unit">ml/h</span></label>
+    <input type="text" inputmode="decimal" id="cat-rate" placeholder="z. B. 3">
+  </div>
+  <div class="field">
+    <label for="cat-weight">Patientengewicht <span class="unit">kg</span></label>
+    <input type="text" inputmode="decimal" id="cat-weight" placeholder="wird aus Abschnitt 1 übernommen">
+    <div class="sync-note" id="cat-weight-sync-note" style="display:none">Manuell geändert. <button id="cat-weight-sync-btn" type="button">↺ Gewicht übernehmen</button></div>
+  </div>
+  <div class="result">
+    <span class="label">Konzentration</span>
+    <span class="value" id="out-cat-conc">–<span class="unit">µg/ml</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Dosis</span>
+    <span class="value" id="out-cat-min">–<span class="unit">µg/kg/min</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">Konzentration = Wirkstoffmenge / Spritzenvolumen × 1000<br>Dosis µg/kg/min = (Laufrate × Konzentration / Gewicht) / 60</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">6</span>mmHg ↔ kPa</h2>
+  <div class="row">
+    <div class="field">
+      <label for="mmhg">Druck <span class="unit">mmHg</span></label>
+      <input type="text" inputmode="decimal" id="mmhg" placeholder="z. B. 100">
+    </div>
+    <div class="field">
+      <label for="kpa">Druck <span class="unit">kPa</span></label>
+      <input type="text" inputmode="decimal" id="kpa" placeholder="z. B. 13,3">
+    </div>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">kPa = mmHg × 0,133322<br>mmHg = kPa × 7,50062</div>
+  </details>
+</div>
+
+<button class="reset" id="reset-btn" type="button">Alle Patientendaten zurücksetzen</button>
+
+<footer>
+  Reine Rechenhilfe für den innerklinischen Gebrauch.<br>
+  Ersetzt nicht die klinische Beurteilung. Werte immer plausibilisieren.
+</footer>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const heightEl = $('height'), weightEl = $('weight'), ciEl = $('ci');
+  const hbEl = $('hb'), sao2El = $('sao2'), flowEl = $('flow');
+  const primingWeightEl = $('priming-weight'), bvFactorEl = $('bv-factor');
+  const startHbEl = $('start-hb'), primingVolEl = $('priming-vol');
+  const catMgEl = $('cat-mg'), catVolEl = $('cat-vol'), catRateEl = $('cat-rate'), catWeightEl = $('cat-weight');
+  const mmhgEl = $('mmhg'), kpaEl = $('kpa');
+
+  function parseNum(str){
+    if(!str) return NaN;
+    const cleaned = String(str).trim().replace(',', '.');
+    const n = parseFloat(cleaned);
+    return isFinite(n) ? n : NaN;
+  }
+
+  function fmt(n, decimals){
+    if(!isFinite(n)) return '–';
+    return n.toLocaleString('de-DE', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
+
+  // Links a field to an auto-computed value: keeps it synced until the user
+  // types a different value themselves, then offers a button to resync.
+  function linkField(targetEl, noteEl, btnEl){
+    const state = { manual:false, lastAuto:null };
+    targetEl.addEventListener('input', function(){
+      const current = parseNum(targetEl.value);
+      state.manual = !(state.lastAuto !== null && Math.abs((current||0) - (state.lastAuto||0)) < 0.005);
+      noteEl.style.display = state.manual ? 'block' : 'none';
+      calc();
+    });
+    btnEl.addEventListener('click', function(){
+      state.manual = false;
+      noteEl.style.display = 'none';
+      calc();
+    });
+    return {
+      set(value, decimals){
+        if(!state.manual){
+          targetEl.value = isFinite(value) ? fmt(value, decimals).replace('.', ',') : '';
+        }
+        state.lastAuto = value;
+      },
+      reset(){
+        state.manual = false;
+        state.lastAuto = null;
+        noteEl.style.display = 'none';
+      }
+    };
+  }
+
+  const flowLink = linkField(flowEl, $('sync-note'), $('sync-btn'));
+  const primingWeightLink = linkField(primingWeightEl, $('priming-weight-sync-note'), $('priming-weight-sync-btn'));
+  const catWeightLink = linkField(catWeightEl, $('cat-weight-sync-note'), $('cat-weight-sync-btn'));
+
+  function calc(){
+    const height = parseNum(heightEl.value);
+    const weight = parseNum(weightEl.value);
+    const ci = parseNum(ciEl.value);
+    const hb = parseNum(hbEl.value);
+    const sao2 = parseNum(sao2El.value);
+
+    let bsa = NaN;
+    if(height > 0 && weight > 0){
+      bsa = 0.007184 * Math.pow(weight, 0.425) * Math.pow(height, 0.725);
+    }
+    $('out-bsa').innerHTML = (isFinite(bsa) ? fmt(bsa,2) : '–') + '<span class="unit">m²</span>';
+
+    let targetFlow = NaN;
+    if(isFinite(bsa) && ci > 0){
+      targetFlow = ci * bsa;
+    }
+    $('out-flow').innerHTML = (isFinite(targetFlow) ? fmt(targetFlow,2) : '–') + '<span class="unit">l/min</span>';
+
+    flowLink.set(targetFlow, 2);
+
+    const flow = parseNum(flowEl.value);
+    let do2 = NaN, do2i = NaN;
+    if(flow > 0 && hb > 0 && sao2 >= 0){
+      do2 = flow * hb * 1.34 * (sao2/100) * 10;
+      if(isFinite(bsa) && bsa > 0){
+        do2i = do2 / bsa;
+      }
+    }
+    $('out-do2').innerHTML = (isFinite(do2) ? fmt(do2,0) : '–') + '<span class="unit">ml/min</span>';
+    $('out-do2i').innerHTML = (isFinite(do2i) ? fmt(do2i,0) : '–') + '<span class="unit">ml/min/m²</span>';
+
+    const flag = $('do2i-flag');
+    flag.style.display = (isFinite(do2i) && do2i < 270) ? 'block' : 'none';
+
+    // 4: Priming-Volumen (erwarteter Hb)
+    primingWeightLink.set(weight, 0);
+    const primingWeight = parseNum(primingWeightEl.value);
+    const bvFactor = parseNum(bvFactorEl.value);
+    const startHb = parseNum(startHbEl.value);
+    const primingVol = parseNum(primingVolEl.value);
+
+    let ebv = NaN, expectedHb = NaN;
+    if(primingWeight > 0 && bvFactor > 0){
+      ebv = primingWeight * bvFactor;
+    }
+    if(isFinite(ebv) && startHb > 0 && primingVol >= 0){
+      expectedHb = (ebv * startHb) / (ebv + primingVol);
+    }
+    $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
+    $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
+
+    // 5: Katecholamine
+    catWeightLink.set(weight, 0);
+    const catWeight = parseNum(catWeightEl.value);
+    const catMg = parseNum(catMgEl.value);
+    const catVol = parseNum(catVolEl.value);
+    const catRate = parseNum(catRateEl.value);
+
+    let conc = NaN, doseH = NaN, doseMin = NaN;
+    if(catMg > 0 && catVol > 0){
+      conc = (catMg / catVol) * 1000;
+    }
+    if(isFinite(conc) && catRate >= 0 && catWeight > 0){
+      doseH = (catRate * conc) / catWeight;
+      doseMin = doseH / 60;
+    }
+    $('out-cat-conc').innerHTML = (isFinite(conc) ? fmt(conc,1) : '–') + '<span class="unit">µg/ml</span>';
+    $('out-cat-min').innerHTML = (isFinite(doseMin) ? fmt(doseMin,3) : '–') + '<span class="unit">µg/kg/min</span>';
+  }
+
+  [heightEl, weightEl, ciEl].forEach(el => el.addEventListener('input', calc));
+  [hbEl, sao2El].forEach(el => el.addEventListener('input', calc));
+  [bvFactorEl, startHbEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
+  [catMgEl, catVolEl, catRateEl].forEach(el => el.addEventListener('input', calc));
+
+  // 6: mmHg <-> kPa, independent two-way converter
+  const MMHG_PER_KPA = 7.50062;
+  mmhgEl.addEventListener('input', function(){
+    const mmhg = parseNum(mmhgEl.value);
+    kpaEl.value = isFinite(mmhg) ? fmt(mmhg / MMHG_PER_KPA, 2).replace('.', ',') : '';
+  });
+  kpaEl.addEventListener('input', function(){
+    const kpa = parseNum(kpaEl.value);
+    mmhgEl.value = isFinite(kpa) ? fmt(kpa * MMHG_PER_KPA, 1).replace('.', ',') : '';
+  });
+
+  $('reset-btn').addEventListener('click', function(){
+    heightEl.value = '';
+    weightEl.value = '';
+    ciEl.value = '2,4';
+    hbEl.value = '';
+    sao2El.value = '';
+    flowEl.value = '';
+    flowLink.reset();
+    primingWeightEl.value = '';
+    primingWeightLink.reset();
+    bvFactorEl.value = '70';
+    startHbEl.value = '';
+    primingVolEl.value = '';
+    catMgEl.value = '';
+    catVolEl.value = '50';
+    catRateEl.value = '';
+    catWeightEl.value = '';
+    catWeightLink.reset();
+    mmhgEl.value = '';
+    kpaEl.value = '';
+    calc();
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
