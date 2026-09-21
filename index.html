@@ -108,6 +108,21 @@
   input[type=text]:focus{
     border-color:var(--accent);
   }
+  select{
+    width:100%;
+    background:var(--input-bg);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:14px 12px;
+    font-size:1.05rem;
+    color:var(--text);
+    outline:none;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  select:focus{
+    border-color:var(--accent);
+  }
   .row{
     display:flex;
     gap:12px;
@@ -241,7 +256,35 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">3</span>Sauerstoffangebot (DO2)</h2>
+  <h2><span class="num">3</span>Organentnahme Custodiol</h2>
+  <div class="field">
+    <label for="custodiol-age">Alter (Spender)</label>
+    <select id="custodiol-age">
+      <option value="3">Bis 1,5 Jahre (CI 3,0)</option>
+      <option value="2.7">1,5 – 3 Jahre (CI 2,7)</option>
+      <option value="2.4" selected>Über 3 Jahre (CI 2,4)</option>
+    </select>
+  </div>
+  <div class="result">
+    <span class="label">HZV (errechnet)</span>
+    <span class="value" id="out-custodiol-hzv">–<span class="unit">l/min</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Perfusionsmenge max.</span>
+    <span class="value" id="out-custodiol-max">–<span class="unit">ml</span></span>
+  </div>
+  <div class="result secondary">
+    <span class="label">Perfusionsmenge min.</span>
+    <span class="value" id="out-custodiol-min">–<span class="unit">ml</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">HZV = CI (nach Alter) × BSA (HZV für Herz)<br>Perfusionsmenge max. = HZV × 1000 × 9 min × 0,1<br>Perfusionsmenge min. = Perfusionsmenge max. × 0,8</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">4</span>Sauerstoffangebot (DO2)</h2>
   <div class="row">
     <div class="field">
       <label for="hb">Hb <span class="unit">g/dl</span></label>
@@ -249,7 +292,7 @@
     </div>
     <div class="field">
       <label for="sao2">SaO2 <span class="unit">%</span></label>
-      <input type="text" inputmode="decimal" id="sao2" placeholder="z. B. 98">
+      <input type="text" inputmode="decimal" id="sao2" value="98">
     </div>
   </div>
   <div class="field">
@@ -273,7 +316,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">4</span>Priming-Volumen (erwarteter Hb)</h2>
+  <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="priming-weight" placeholder="wird aus Abschnitt 1 übernommen">
@@ -306,7 +349,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">5</span>Katecholamine</h2>
+  <h2><span class="num">6</span>Katecholamine</h2>
   <div class="row">
     <div class="field">
       <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
@@ -341,7 +384,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">6</span>mmHg ↔ kPa</h2>
+  <h2><span class="num">7</span>mmHg ↔ kPa</h2>
   <div class="row">
     <div class="field">
       <label for="mmhg">Druck <span class="unit">mmHg</span></label>
@@ -369,6 +412,7 @@
 (function(){
   const $ = id => document.getElementById(id);
   const heightEl = $('height'), weightEl = $('weight'), ciEl = $('ci');
+  const custodiolAgeEl = $('custodiol-age');
   const hbEl = $('hb'), sao2El = $('sao2'), flowEl = $('flow');
   const primingWeightEl = $('priming-weight'), bvFactorEl = $('bv-factor');
   const startHbEl = $('start-hb'), primingVolEl = $('priming-vol');
@@ -442,6 +486,18 @@
 
     flowLink.set(targetFlow, 2);
 
+    // 3: Organentnahme Custodiol
+    const custodiolCI = parseNum(custodiolAgeEl.value);
+    let custodiolHzv = NaN, custodiolMax = NaN, custodiolMin = NaN;
+    if(isFinite(bsa) && custodiolCI > 0){
+      custodiolHzv = custodiolCI * bsa;
+      custodiolMax = custodiolHzv * 1000 * 9 * 0.1;
+      custodiolMin = custodiolMax * 0.8;
+    }
+    $('out-custodiol-hzv').innerHTML = (isFinite(custodiolHzv) ? fmt(custodiolHzv,2) : '–') + '<span class="unit">l/min</span>';
+    $('out-custodiol-max').innerHTML = (isFinite(custodiolMax) ? fmt(custodiolMax,0) : '–') + '<span class="unit">ml</span>';
+    $('out-custodiol-min').innerHTML = (isFinite(custodiolMin) ? fmt(custodiolMin,0) : '–') + '<span class="unit">ml</span>';
+
     const flow = parseNum(flowEl.value);
     let do2 = NaN, do2i = NaN;
     if(flow > 0 && hb > 0 && sao2 >= 0){
@@ -493,6 +549,7 @@
   }
 
   [heightEl, weightEl, ciEl].forEach(el => el.addEventListener('input', calc));
+  custodiolAgeEl.addEventListener('change', calc);
   [hbEl, sao2El].forEach(el => el.addEventListener('input', calc));
   [bvFactorEl, startHbEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
   [catMgEl, catVolEl, catRateEl].forEach(el => el.addEventListener('input', calc));
@@ -512,8 +569,9 @@
     heightEl.value = '';
     weightEl.value = '';
     ciEl.value = '2,4';
+    custodiolAgeEl.value = '2.4';
     hbEl.value = '';
-    sao2El.value = '';
+    sao2El.value = '98';
     flowEl.value = '';
     flowLink.reset();
     primingWeightEl.value = '';
