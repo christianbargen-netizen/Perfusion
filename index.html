@@ -229,6 +229,10 @@
       <input type="text" inputmode="decimal" id="weight" placeholder="z. B. 78">
     </div>
   </div>
+  <div class="field">
+    <label for="base-hb">Ausgangs-Hb <span class="unit">g/dl</span></label>
+    <input type="text" inputmode="decimal" id="base-hb" placeholder="z. B. 13">
+  </div>
   <div class="result primary">
     <span class="label">BSA (DuBois)</span>
     <span class="value" id="out-bsa">–<span class="unit">m²</span></span>
@@ -288,7 +292,8 @@
   <div class="row">
     <div class="field">
       <label for="hb">Hb <span class="unit">g/dl</span></label>
-      <input type="text" inputmode="decimal" id="hb" placeholder="z. B. 10">
+      <input type="text" inputmode="decimal" id="hb" placeholder="wird aus Abschnitt 1 übernommen">
+      <div class="sync-note" id="hb-sync-note" style="display:none">Manuell geändert. <button id="hb-sync-btn" type="button">↺ Ausgangs-Hb übernehmen</button></div>
     </div>
     <div class="field">
       <label for="sao2">SaO2 <span class="unit">%</span></label>
@@ -328,7 +333,8 @@
   </div>
   <div class="field">
     <label for="start-hb">Ausgangs-Hb <span class="unit">g/dl</span></label>
-    <input type="text" inputmode="decimal" id="start-hb" placeholder="z. B. 13">
+    <input type="text" inputmode="decimal" id="start-hb" placeholder="wird aus Abschnitt 1 übernommen">
+    <div class="sync-note" id="start-hb-sync-note" style="display:none">Manuell geändert. <button id="start-hb-sync-btn" type="button">↺ Ausgangs-Hb übernehmen</button></div>
   </div>
   <div class="field">
     <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
@@ -411,7 +417,7 @@
 <script>
 (function(){
   const $ = id => document.getElementById(id);
-  const heightEl = $('height'), weightEl = $('weight'), ciEl = $('ci');
+  const heightEl = $('height'), weightEl = $('weight'), ciEl = $('ci'), baseHbEl = $('base-hb');
   const custodiolAgeEl = $('custodiol-age');
   const hbEl = $('hb'), sao2El = $('sao2'), flowEl = $('flow');
   const primingWeightEl = $('priming-weight'), bvFactorEl = $('bv-factor');
@@ -420,7 +426,7 @@
   const mmhgEl = $('mmhg'), kpaEl = $('kpa');
 
   const STORAGE_PREFIX = 'perfusionsrechner:';
-  const persistedIds = ['height','weight','ci','custodiol-age','hb','sao2','flow',
+  const persistedIds = ['height','weight','ci','base-hb','custodiol-age','hb','sao2','flow',
     'priming-weight','bv-factor','start-hb','priming-vol',
     'cat-mg','cat-vol','cat-rate','cat-weight','mmhg','kpa'];
 
@@ -484,13 +490,18 @@
   const flowLink = linkField(flowEl, $('sync-note'), $('sync-btn'));
   const primingWeightLink = linkField(primingWeightEl, $('priming-weight-sync-note'), $('priming-weight-sync-btn'));
   const catWeightLink = linkField(catWeightEl, $('cat-weight-sync-note'), $('cat-weight-sync-btn'));
+  const hbLink = linkField(hbEl, $('hb-sync-note'), $('hb-sync-btn'));
+  const startHbLink = linkField(startHbEl, $('start-hb-sync-note'), $('start-hb-sync-btn'));
 
   function calc(){
     const height = parseNum(heightEl.value);
     const weight = parseNum(weightEl.value);
     const ci = parseNum(ciEl.value);
-    const hb = parseNum(hbEl.value);
+    const baseHb = parseNum(baseHbEl.value);
     const sao2 = parseNum(sao2El.value);
+
+    hbLink.set(baseHb, 1);
+    startHbLink.set(baseHb, 1);
 
     let bsa = NaN;
     if(height > 0 && weight > 0){
@@ -519,6 +530,7 @@
     $('out-custodiol-min').innerHTML = (isFinite(custodiolMin) ? fmt(custodiolMin,0) : '–') + '<span class="unit">ml</span>';
 
     const flow = parseNum(flowEl.value);
+    const hb = parseNum(hbEl.value);
     let do2 = NaN, do2i = NaN;
     if(flow > 0 && hb > 0 && sao2 >= 0){
       do2 = flow * hb * 1.34 * (sao2/100) * 10;
@@ -568,10 +580,10 @@
     $('out-cat-min').innerHTML = (isFinite(doseMin) ? fmt(doseMin,3) : '–') + '<span class="unit">µg/kg/min</span>';
   }
 
-  [heightEl, weightEl, ciEl].forEach(el => el.addEventListener('input', calc));
+  [heightEl, weightEl, ciEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   custodiolAgeEl.addEventListener('change', calc);
-  [hbEl, sao2El].forEach(el => el.addEventListener('input', calc));
-  [bvFactorEl, startHbEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
+  sao2El.addEventListener('input', calc);
+  [bvFactorEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
   [catMgEl, catVolEl, catRateEl].forEach(el => el.addEventListener('input', calc));
 
   // 6: mmHg <-> kPa, independent two-way converter
@@ -589,8 +601,10 @@
     heightEl.value = '';
     weightEl.value = '';
     ciEl.value = '2,4';
+    baseHbEl.value = '';
     custodiolAgeEl.value = '2.4';
     hbEl.value = '';
+    hbLink.reset();
     sao2El.value = '98';
     flowEl.value = '';
     flowLink.reset();
@@ -598,6 +612,7 @@
     primingWeightLink.reset();
     bvFactorEl.value = '70';
     startHbEl.value = '';
+    startHbLink.reset();
     primingVolEl.value = '';
     catMgEl.value = '';
     catVolEl.value = '50';
@@ -620,6 +635,8 @@
   if(storageGet(STORAGE_PREFIX + 'flow-manual') === '1') flowLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'priming-weight-manual') === '1') primingWeightLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'cat-weight-manual') === '1') catWeightLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'hb-manual') === '1') hbLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'start-hb-manual') === '1') startHbLink.markManual();
 
   // mmHg/kPa-Wandler nach dem Wiederherstellen einmal synchronisieren
   const restoredMmhg = parseNum(mmhgEl.value);
