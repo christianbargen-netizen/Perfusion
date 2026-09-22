@@ -419,6 +419,18 @@
   const catMgEl = $('cat-mg'), catVolEl = $('cat-vol'), catRateEl = $('cat-rate'), catWeightEl = $('cat-weight');
   const mmhgEl = $('mmhg'), kpaEl = $('kpa');
 
+  const STORAGE_PREFIX = 'perfusionsrechner:';
+  const persistedIds = ['height','weight','ci','custodiol-age','hb','sao2','flow',
+    'priming-weight','bv-factor','start-hb','priming-vol',
+    'cat-mg','cat-vol','cat-rate','cat-weight','mmhg','kpa'];
+
+  function storageGet(key){
+    try{ return localStorage.getItem(key); }catch(e){ return null; }
+  }
+  function storageSet(key, value){
+    try{ localStorage.setItem(key, value); }catch(e){}
+  }
+
   function parseNum(str){
     if(!str) return NaN;
     const cleaned = String(str).trim().replace(',', '.');
@@ -435,15 +447,18 @@
   // types a different value themselves, then offers a button to resync.
   function linkField(targetEl, noteEl, btnEl){
     const state = { manual:false, lastAuto:null };
+    const manualKey = STORAGE_PREFIX + targetEl.id + '-manual';
     targetEl.addEventListener('input', function(){
       const current = parseNum(targetEl.value);
       state.manual = !(state.lastAuto !== null && Math.abs((current||0) - (state.lastAuto||0)) < 0.005);
       noteEl.style.display = state.manual ? 'block' : 'none';
+      storageSet(manualKey, state.manual ? '1' : '0');
       calc();
     });
     btnEl.addEventListener('click', function(){
       state.manual = false;
       noteEl.style.display = 'none';
+      storageSet(manualKey, '0');
       calc();
     });
     return {
@@ -457,6 +472,11 @@
         state.manual = false;
         state.lastAuto = null;
         noteEl.style.display = 'none';
+        storageSet(manualKey, '0');
+      },
+      markManual(){
+        state.manual = true;
+        noteEl.style.display = 'block';
       }
     };
   }
@@ -587,6 +607,36 @@
     mmhgEl.value = '';
     kpaEl.value = '';
     calc();
+    persistedIds.forEach(function(id){ storageSet(STORAGE_PREFIX + id, $(id).value); });
+  });
+
+  // Letzte Werte aus dem vorherigen Aufruf wiederherstellen
+  persistedIds.forEach(function(id){
+    const stored = storageGet(STORAGE_PREFIX + id);
+    if(stored !== null){
+      $(id).value = stored;
+    }
+  });
+  if(storageGet(STORAGE_PREFIX + 'flow-manual') === '1') flowLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'priming-weight-manual') === '1') primingWeightLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'cat-weight-manual') === '1') catWeightLink.markManual();
+
+  // mmHg/kPa-Wandler nach dem Wiederherstellen einmal synchronisieren
+  const restoredMmhg = parseNum(mmhgEl.value);
+  if(isFinite(restoredMmhg)){
+    kpaEl.value = fmt(restoredMmhg / MMHG_PER_KPA, 2).replace('.', ',');
+  }else{
+    const restoredKpa = parseNum(kpaEl.value);
+    if(isFinite(restoredKpa)){
+      mmhgEl.value = fmt(restoredKpa * MMHG_PER_KPA, 1).replace('.', ',');
+    }
+  }
+
+  // Jede Eingabe sofort für den nächsten Aufruf speichern
+  persistedIds.forEach(function(id){
+    const el = $(id);
+    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, function(){ storageSet(STORAGE_PREFIX + id, el.value); });
   });
 
   calc();
