@@ -485,7 +485,10 @@
   <h2><span class="num">2</span>Ziel-Pumpenfluss</h2>
   <div class="field">
     <label for="ci">Cardiac Index <span class="unit">l/min/m²</span></label>
-    <input type="text" inputmode="decimal" id="ci" value="2,4">
+    <input type="text" inputmode="decimal" id="ci" placeholder="automatisch">
+    <div class="sync-note" id="ci-sync-note" style="display:none">Manuell geändert
+      <button id="ci-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Alter (Abschnitt 3) übernehmen</button>
+    </div>
   </div>
   <div class="result primary">
     <span class="label">Ziel-Flow</span>
@@ -493,7 +496,7 @@
   </div>
   <details>
     <summary>Formel</summary>
-    <div class="formula">Flow = CI × BSA</div>
+    <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA</div>
   </details>
 </div>
 
@@ -755,6 +758,7 @@
   }
 
   const flowLink = linkField(flowEl, $('sync-note'), $('sync-btn'));
+  const ciLink = linkField(ciEl, $('ci-sync-note'), $('ci-sync-btn'));
   const primingWeightLink = linkField(primingWeightEl, $('priming-weight-sync-note'), $('priming-weight-sync-btn'));
   const catWeightLink = linkField(catWeightEl, $('cat-weight-sync-note'), $('cat-weight-sync-btn'));
   const hbLink = linkField(hbEl, $('hb-sync-note'), $('hb-sync-btn'));
@@ -763,12 +767,16 @@
   function calc(){
     const height = parseNum(heightEl.value);
     const weight = parseNum(weightEl.value);
-    const ci = parseNum(ciEl.value);
     const baseHb = parseNum(baseHbEl.value);
     const sao2 = parseNum(sao2El.value);
 
     hbLink.set(baseHb, 1);
     startHbLink.set(baseHb, 1);
+
+    // Alter (Abschnitt 3) legt den Cardiac Index für den Ziel-Flow vor
+    const custodiolCI = parseNum(custodiolAgeEl.value);
+    ciLink.set(custodiolCI, 1);
+    const ci = parseNum(ciEl.value);
 
     let bsa = NaN;
     if(height > 0 && weight > 0){
@@ -785,7 +793,6 @@
     flowLink.set(targetFlow, 2);
 
     // 3: Organentnahme Custodiol
-    const custodiolCI = parseNum(custodiolAgeEl.value);
     let custodiolHzv = NaN, custodiolMax = NaN, custodiolMin = NaN;
     if(isFinite(bsa) && custodiolCI > 0){
       custodiolHzv = custodiolCI * bsa;
@@ -867,7 +874,7 @@
     $('out-cat-min').innerHTML = (isFinite(doseMin) ? fmt(doseMin,3) : '–') + '<span class="unit">µg/kg/min</span>';
   }
 
-  [heightEl, weightEl, ciEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
+  [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   custodiolAgeEl.addEventListener('change', calc);
   sao2El.addEventListener('input', calc);
   [bvFactorEl, primingVolEl, proteinEl].forEach(el => el.addEventListener('input', calc));
@@ -887,7 +894,8 @@
   $('reset-btn').addEventListener('click', function(){
     heightEl.value = '';
     weightEl.value = '';
-    ciEl.value = '2,4';
+    ciEl.value = '';
+    ciLink.reset();
     baseHbEl.value = '';
     custodiolAgeEl.value = '2.4';
     hbEl.value = '';
@@ -920,6 +928,7 @@
       $(id).value = stored;
     }
   });
+  if(storageGet(STORAGE_PREFIX + 'ci-manual') === '1') ciLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'flow-manual') === '1') flowLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'priming-weight-manual') === '1') primingWeightLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'cat-weight-manual') === '1') catWeightLink.markManual();
