@@ -569,7 +569,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">5</span>Priming-Volumen &amp; KOD</h2>
+  <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="priming-weight" placeholder="automatisch">
@@ -592,10 +592,6 @@
     <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
     <input type="text" inputmode="decimal" id="priming-vol" placeholder="z. B. 1400">
   </div>
-  <div class="field">
-    <label for="protein">Gesamteiweiß (Ausgangswert) <span class="unit">g/dl</span></label>
-    <input type="text" inputmode="decimal" id="protein" placeholder="z. B. 6,0">
-  </div>
   <div class="result">
     <span class="label">Geschätztes Blutvolumen</span>
     <span class="value" id="out-ebv">–<span class="unit">ml</span></span>
@@ -604,13 +600,55 @@
     <span class="label">Erwarteter Hb</span>
     <span class="value" id="out-priming-hb">–<span class="unit">g/dl</span></span>
   </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)</div>
+  </details>
+</div>
+
+<div class="card">
+  <h2><span class="num">6</span>Kolloidosmotischer Druck (KOD)</h2>
+  <div class="field">
+    <label for="kod-weight">Patientengewicht <span class="unit">kg</span></label>
+    <input type="text" inputmode="decimal" id="kod-weight" placeholder="automatisch">
+    <div class="sync-note" id="kod-weight-sync-note" style="display:none">Manuell geändert
+      <button id="kod-weight-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Gewicht übernehmen</button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="kod-bv-factor">Blutvolumen-Faktor <span class="unit">ml/kg</span></label>
+    <input type="text" inputmode="decimal" id="kod-bv-factor" value="70">
+  </div>
+  <div class="field">
+    <label for="kod-protein">Gesamteiweiß (Ausgangswert) <span class="unit">g/dl</span></label>
+    <input type="text" inputmode="decimal" id="kod-protein" placeholder="z. B. 6,0">
+  </div>
+  <div class="field">
+    <label for="kod-priming-vol">Priming-Volumen <span class="unit">ml</span></label>
+    <input type="text" inputmode="decimal" id="kod-priming-vol" placeholder="automatisch">
+    <div class="sync-note" id="kod-priming-vol-sync-note" style="display:none">Manuell geändert
+      <button id="kod-priming-vol-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Priming-Volumen übernehmen</button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="kod-infusion-vol">Infusionslösung während Perfusion <span class="unit">ml</span></label>
+    <input type="text" inputmode="decimal" id="kod-infusion-vol" placeholder="z. B. 500">
+  </div>
+  <div class="field">
+    <label for="kod-albumin-vol">Humanalbumin 20 % <span class="unit">ml</span></label>
+    <input type="text" inputmode="decimal" id="kod-albumin-vol" placeholder="z. B. 100">
+  </div>
+  <div class="result">
+    <span class="label">Blutvolumen (EBV)</span>
+    <span class="value" id="out-kod-ebv">–<span class="unit">ml</span></span>
+  </div>
   <div class="result">
     <span class="label">KOD (Ausgangswert)</span>
-    <span class="value" id="out-kod">–<span class="unit">mmHg</span></span>
+    <span class="value" id="out-kod-start">–<span class="unit">mmHg</span></span>
   </div>
-  <div class="result primary" id="priming-kod-result">
-    <span class="label">Erwarteter KOD nach Priming</span>
-    <span class="value" id="out-priming-kod">–<span class="unit">mmHg</span></span>
+  <div class="result primary" id="kod-current-result">
+    <span class="label">KOD aktuell (nach Volumengabe)</span>
+    <span class="value" id="out-kod-current">–<span class="unit">mmHg</span></span>
   </div>
   <div class="flag" id="kod-flag" style="display:none">
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.6 14.9 13.4A1 1 0 0 1 14 15H2a1 1 0 0 1-.9-1.6L8 1.6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.3v3.4M8 12.1h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -618,12 +656,12 @@
   </div>
   <details>
     <summary>Formel</summary>
-    <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)<br>KOD (Landis-Pappenheimer) = 2,1×TP + 0,16×TP² + 0,009×TP³<br>Erwarteter KOD nach Priming = KOD × EBV / (EBV + Priming-Volumen)</div>
+    <div class="formula">EBV = Gewicht × Blutvolumen-Faktor<br>KOD (Landis-Pappenheimer) = 2,1×TP + 0,16×TP² + 0,009×TP³<br>Eiweißmasse = TP×EBV/100 + 20×Humanalbumin/100<br>Gesamtvolumen = EBV + Priming + Infusion + Humanalbumin<br>TP aktuell = Eiweißmasse×100 / Gesamtvolumen<br>KOD aktuell = Landis-Pappenheimer(TP aktuell)</div>
   </details>
 </div>
 
 <div class="card">
-  <h2><span class="num">6</span>Katecholamine</h2>
+  <h2><span class="num">7</span>Katecholamine</h2>
   <div class="row">
     <div class="field">
       <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
@@ -660,7 +698,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">7</span>mmHg ↔ kPa</h2>
+  <h2><span class="num">8</span>mmHg ↔ kPa</h2>
   <div class="row">
     <div class="field">
       <label for="mmhg">Druck <span class="unit">mmHg</span></label>
@@ -691,13 +729,16 @@
   const custodiolAgeEl = $('custodiol-age');
   const hbEl = $('hb'), sao2El = $('sao2'), flowEl = $('flow');
   const primingWeightEl = $('priming-weight'), bvFactorEl = $('bv-factor');
-  const startHbEl = $('start-hb'), primingVolEl = $('priming-vol'), proteinEl = $('protein');
+  const startHbEl = $('start-hb'), primingVolEl = $('priming-vol');
+  const kodWeightEl = $('kod-weight'), kodBvFactorEl = $('kod-bv-factor'), kodProteinEl = $('kod-protein');
+  const kodPrimingVolEl = $('kod-priming-vol'), kodInfusionVolEl = $('kod-infusion-vol'), kodAlbuminVolEl = $('kod-albumin-vol');
   const catMgEl = $('cat-mg'), catVolEl = $('cat-vol'), catRateEl = $('cat-rate'), catWeightEl = $('cat-weight');
   const mmhgEl = $('mmhg'), kpaEl = $('kpa');
 
   const STORAGE_PREFIX = 'perfusionsrechner:';
   const persistedIds = ['height','weight','ci','base-hb','custodiol-age','hb','sao2','flow',
-    'priming-weight','bv-factor','start-hb','priming-vol','protein',
+    'priming-weight','bv-factor','start-hb','priming-vol',
+    'kod-weight','kod-bv-factor','kod-protein','kod-priming-vol','kod-infusion-vol','kod-albumin-vol',
     'cat-mg','cat-vol','cat-rate','cat-weight','mmhg','kpa'];
 
   function storageGet(key){
@@ -740,7 +781,7 @@
     return {
       set(value, decimals){
         if(!state.manual){
-          targetEl.value = isFinite(value) ? fmt(value, decimals).replace('.', ',') : '';
+          targetEl.value = isFinite(value) ? fmt(value, decimals) : '';
         }
         state.lastAuto = value;
       },
@@ -763,6 +804,8 @@
   const catWeightLink = linkField(catWeightEl, $('cat-weight-sync-note'), $('cat-weight-sync-btn'));
   const hbLink = linkField(hbEl, $('hb-sync-note'), $('hb-sync-btn'));
   const startHbLink = linkField(startHbEl, $('start-hb-sync-note'), $('start-hb-sync-btn'));
+  const kodWeightLink = linkField(kodWeightEl, $('kod-weight-sync-note'), $('kod-weight-sync-btn'));
+  const kodPrimingVolLink = linkField(kodPrimingVolEl, $('kod-priming-vol-sync-note'), $('kod-priming-vol-sync-btn'));
 
   function calc(){
     const height = parseNum(heightEl.value);
@@ -838,24 +881,50 @@
     $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
     $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
 
-    // KOD (Landis-Pappenheimer) und erwarteter KOD nach Priming-Verdünnung
-    const protein = parseNum(proteinEl.value);
-    let kod = NaN, expectedKod = NaN;
-    if(protein > 0){
-      kod = 2.1 * protein + 0.16 * Math.pow(protein, 2) + 0.009 * Math.pow(protein, 3);
-    }
-    if(isFinite(kod) && isFinite(ebv) && primingVol >= 0){
-      expectedKod = kod * ebv / (ebv + primingVol);
-    }
-    $('out-kod').innerHTML = (isFinite(kod) ? fmt(kod,1) : '–') + '<span class="unit">mmHg</span>';
-    $('out-priming-kod').innerHTML = (isFinite(expectedKod) ? fmt(expectedKod,1) : '–') + '<span class="unit">mmHg</span>';
+    // 5: Kolloidosmotischer Druck (KOD)
+    kodWeightLink.set(weight, 0);
+    const kodWeight = parseNum(kodWeightEl.value);
+    const kodBvFactor = parseNum(kodBvFactorEl.value);
+    const kodProtein = parseNum(kodProteinEl.value);
 
-    const kodCritical = isFinite(expectedKod) && expectedKod < 16;
+    let kodEbv = NaN;
+    if(kodWeight > 0 && kodBvFactor > 0){
+      kodEbv = kodWeight * kodBvFactor;
+    }
+
+    kodPrimingVolLink.set(primingVol, 0);
+    const kodPrimingVol = parseNum(kodPrimingVolEl.value);
+    const kodInfusionVol = parseNum(kodInfusionVolEl.value);
+    const kodAlbuminVol = parseNum(kodAlbuminVolEl.value);
+
+    function landisPappenheimer(tp){
+      return 2.1 * tp + 0.16 * Math.pow(tp, 2) + 0.009 * Math.pow(tp, 3);
+    }
+
+    let kodStart = NaN, kodCurrent = NaN;
+    if(kodProtein > 0){
+      kodStart = landisPappenheimer(kodProtein);
+    }
+    if(kodProtein > 0 && isFinite(kodEbv)){
+      const safePriming = kodPrimingVol >= 0 ? kodPrimingVol : 0;
+      const safeInfusion = kodInfusionVol >= 0 ? kodInfusionVol : 0;
+      const safeAlbumin = kodAlbuminVol >= 0 ? kodAlbuminVol : 0;
+      const proteinMass = (kodProtein * kodEbv / 100) + (20 * safeAlbumin / 100);
+      const totalVolume = kodEbv + safePriming + safeInfusion + safeAlbumin;
+      if(totalVolume > 0){
+        kodCurrent = landisPappenheimer(proteinMass * 100 / totalVolume);
+      }
+    }
+    $('out-kod-ebv').innerHTML = (isFinite(kodEbv) ? fmt(kodEbv,0) : '–') + '<span class="unit">ml</span>';
+    $('out-kod-start').innerHTML = (isFinite(kodStart) ? fmt(kodStart,1) : '–') + '<span class="unit">mmHg</span>';
+    $('out-kod-current').innerHTML = (isFinite(kodCurrent) ? fmt(kodCurrent,1) : '–') + '<span class="unit">mmHg</span>';
+
+    const kodCritical = isFinite(kodCurrent) && kodCurrent < 16;
     $('kod-flag').style.display = kodCritical ? 'block' : 'none';
-    $('priming-kod-result').classList.toggle('primary', !kodCritical);
-    $('priming-kod-result').classList.toggle('danger', kodCritical);
+    $('kod-current-result').classList.toggle('primary', !kodCritical);
+    $('kod-current-result').classList.toggle('danger', kodCritical);
 
-    // 5: Katecholamine
+    // 6: Katecholamine
     catWeightLink.set(weight, 0);
     const catWeight = parseNum(catWeightEl.value);
     const catMg = parseNum(catMgEl.value);
@@ -877,18 +946,19 @@
   [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   custodiolAgeEl.addEventListener('change', calc);
   sao2El.addEventListener('input', calc);
-  [bvFactorEl, primingVolEl, proteinEl].forEach(el => el.addEventListener('input', calc));
+  [bvFactorEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
+  [kodBvFactorEl, kodProteinEl, kodInfusionVolEl, kodAlbuminVolEl].forEach(el => el.addEventListener('input', calc));
   [catMgEl, catVolEl, catRateEl].forEach(el => el.addEventListener('input', calc));
 
   // 6: mmHg <-> kPa, independent two-way converter
   const MMHG_PER_KPA = 7.50062;
   mmhgEl.addEventListener('input', function(){
     const mmhg = parseNum(mmhgEl.value);
-    kpaEl.value = isFinite(mmhg) ? fmt(mmhg / MMHG_PER_KPA, 2).replace('.', ',') : '';
+    kpaEl.value = isFinite(mmhg) ? fmt(mmhg / MMHG_PER_KPA, 2) : '';
   });
   kpaEl.addEventListener('input', function(){
     const kpa = parseNum(kpaEl.value);
-    mmhgEl.value = isFinite(kpa) ? fmt(kpa * MMHG_PER_KPA, 1).replace('.', ',') : '';
+    mmhgEl.value = isFinite(kpa) ? fmt(kpa * MMHG_PER_KPA, 1) : '';
   });
 
   $('reset-btn').addEventListener('click', function(){
@@ -909,7 +979,14 @@
     startHbEl.value = '';
     startHbLink.reset();
     primingVolEl.value = '';
-    proteinEl.value = '';
+    kodWeightEl.value = '';
+    kodWeightLink.reset();
+    kodBvFactorEl.value = '70';
+    kodProteinEl.value = '';
+    kodPrimingVolEl.value = '';
+    kodPrimingVolLink.reset();
+    kodInfusionVolEl.value = '';
+    kodAlbuminVolEl.value = '';
     catMgEl.value = '';
     catVolEl.value = '50';
     catRateEl.value = '';
@@ -934,15 +1011,17 @@
   if(storageGet(STORAGE_PREFIX + 'cat-weight-manual') === '1') catWeightLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'hb-manual') === '1') hbLink.markManual();
   if(storageGet(STORAGE_PREFIX + 'start-hb-manual') === '1') startHbLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'kod-weight-manual') === '1') kodWeightLink.markManual();
+  if(storageGet(STORAGE_PREFIX + 'kod-priming-vol-manual') === '1') kodPrimingVolLink.markManual();
 
   // mmHg/kPa-Wandler nach dem Wiederherstellen einmal synchronisieren
   const restoredMmhg = parseNum(mmhgEl.value);
   if(isFinite(restoredMmhg)){
-    kpaEl.value = fmt(restoredMmhg / MMHG_PER_KPA, 2).replace('.', ',');
+    kpaEl.value = fmt(restoredMmhg / MMHG_PER_KPA, 2);
   }else{
     const restoredKpa = parseNum(kpaEl.value);
     if(isFinite(restoredKpa)){
-      mmhgEl.value = fmt(restoredKpa * MMHG_PER_KPA, 1).replace('.', ',');
+      mmhgEl.value = fmt(restoredKpa * MMHG_PER_KPA, 1);
     }
   }
 
