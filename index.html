@@ -157,6 +157,7 @@
   }
   .result.primary .value{color:var(--accent);}
   .result.secondary .value{color:var(--accent-2);}
+  .result.danger .value{color:var(--danger);}
   .flag{
     font-size:0.8rem;
     color:var(--warn);
@@ -309,7 +310,7 @@
     <span class="label">DO2</span>
     <span class="value" id="out-do2">–<span class="unit">ml/min</span></span>
   </div>
-  <div class="result secondary">
+  <div class="result secondary" id="do2i-result">
     <span class="label">DO2-Index</span>
     <span class="value" id="out-do2i">–<span class="unit">ml/min/m²</span></span>
   </div>
@@ -541,8 +542,11 @@
     $('out-do2').innerHTML = (isFinite(do2) ? fmt(do2,0) : '–') + '<span class="unit">ml/min</span>';
     $('out-do2i').innerHTML = (isFinite(do2i) ? fmt(do2i,0) : '–') + '<span class="unit">ml/min/m²</span>';
 
+    const do2iCritical = isFinite(do2i) && do2i < 270;
     const flag = $('do2i-flag');
-    flag.style.display = (isFinite(do2i) && do2i < 270) ? 'block' : 'none';
+    flag.style.display = do2iCritical ? 'block' : 'none';
+    $('do2i-result').classList.toggle('secondary', !do2iCritical);
+    $('do2i-result').classList.toggle('danger', do2iCritical);
 
     // 4: Priming-Volumen (erwarteter Hb)
     primingWeightLink.set(weight, 0);
