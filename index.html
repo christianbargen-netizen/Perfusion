@@ -503,7 +503,7 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
+  <h2><span class="num">5</span>Priming-Volumen &amp; KOD</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="priming-weight" placeholder="automatisch">
@@ -526,6 +526,10 @@
     <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
     <input type="text" inputmode="decimal" id="priming-vol" placeholder="z. B. 1400">
   </div>
+  <div class="field">
+    <label for="protein">Gesamteiweiß (Ausgangswert) <span class="unit">g/dl</span></label>
+    <input type="text" inputmode="decimal" id="protein" placeholder="z. B. 6,0">
+  </div>
   <div class="result">
     <span class="label">Geschätztes Blutvolumen</span>
     <span class="value" id="out-ebv">–<span class="unit">ml</span></span>
@@ -534,9 +538,21 @@
     <span class="label">Erwarteter Hb</span>
     <span class="value" id="out-priming-hb">–<span class="unit">g/dl</span></span>
   </div>
+  <div class="result">
+    <span class="label">KOD (Ausgangswert)</span>
+    <span class="value" id="out-kod">–<span class="unit">mmHg</span></span>
+  </div>
+  <div class="result primary" id="priming-kod-result">
+    <span class="label">Erwarteter KOD nach Priming</span>
+    <span class="value" id="out-priming-kod">–<span class="unit">mmHg</span></span>
+  </div>
+  <div class="flag" id="kod-flag" style="display:none">
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.6 14.9 13.4A1 1 0 0 1 14 15H2a1 1 0 0 1-.9-1.6L8 1.6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.3v3.4M8 12.1h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    KOD niedrig – erhöhtes Ödemrisiko (Richtwert &lt;16 mmHg)
+  </div>
   <details>
     <summary>Formel</summary>
-    <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)</div>
+    <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)<br>KOD (Landis-Pappenheimer) = 2,1×TP + 0,16×TP² + 0,009×TP³<br>Erwarteter KOD nach Priming = KOD × EBV / (EBV + Priming-Volumen)</div>
   </details>
 </div>
 
@@ -609,13 +625,13 @@
   const custodiolAgeEl = $('custodiol-age');
   const hbEl = $('hb'), sao2El = $('sao2'), flowEl = $('flow');
   const primingWeightEl = $('priming-weight'), bvFactorEl = $('bv-factor');
-  const startHbEl = $('start-hb'), primingVolEl = $('priming-vol');
+  const startHbEl = $('start-hb'), primingVolEl = $('priming-vol'), proteinEl = $('protein');
   const catMgEl = $('cat-mg'), catVolEl = $('cat-vol'), catRateEl = $('cat-rate'), catWeightEl = $('cat-weight');
   const mmhgEl = $('mmhg'), kpaEl = $('kpa');
 
   const STORAGE_PREFIX = 'perfusionsrechner:';
   const persistedIds = ['height','weight','ci','base-hb','custodiol-age','hb','sao2','flow',
-    'priming-weight','bv-factor','start-hb','priming-vol',
+    'priming-weight','bv-factor','start-hb','priming-vol','protein',
     'cat-mg','cat-vol','cat-rate','cat-weight','mmhg','kpa'];
 
   function storageGet(key){
@@ -752,6 +768,23 @@
     $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
     $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
 
+    // KOD (Landis-Pappenheimer) und erwarteter KOD nach Priming-Verdünnung
+    const protein = parseNum(proteinEl.value);
+    let kod = NaN, expectedKod = NaN;
+    if(protein > 0){
+      kod = 2.1 * protein + 0.16 * Math.pow(protein, 2) + 0.009 * Math.pow(protein, 3);
+    }
+    if(isFinite(kod) && isFinite(ebv) && primingVol >= 0){
+      expectedKod = kod * ebv / (ebv + primingVol);
+    }
+    $('out-kod').innerHTML = (isFinite(kod) ? fmt(kod,1) : '–') + '<span class="unit">mmHg</span>';
+    $('out-priming-kod').innerHTML = (isFinite(expectedKod) ? fmt(expectedKod,1) : '–') + '<span class="unit">mmHg</span>';
+
+    const kodCritical = isFinite(expectedKod) && expectedKod < 16;
+    $('kod-flag').style.display = kodCritical ? 'block' : 'none';
+    $('priming-kod-result').classList.toggle('primary', !kodCritical);
+    $('priming-kod-result').classList.toggle('danger', kodCritical);
+
     // 5: Katecholamine
     catWeightLink.set(weight, 0);
     const catWeight = parseNum(catWeightEl.value);
@@ -774,7 +807,7 @@
   [heightEl, weightEl, ciEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   custodiolAgeEl.addEventListener('change', calc);
   sao2El.addEventListener('input', calc);
-  [bvFactorEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
+  [bvFactorEl, primingVolEl, proteinEl].forEach(el => el.addEventListener('input', calc));
   [catMgEl, catVolEl, catRateEl].forEach(el => el.addEventListener('input', calc));
 
   // 6: mmHg <-> kPa, independent two-way converter
@@ -805,6 +838,7 @@
     startHbEl.value = '';
     startHbLink.reset();
     primingVolEl.value = '';
+    proteinEl.value = '';
     catMgEl.value = '';
     catVolEl.value = '50';
     catRateEl.value = '';
