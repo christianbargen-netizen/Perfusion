@@ -10,213 +10,387 @@
 <meta name="theme-color" content="#0b1220">
 <style>
   :root{
-    --bg:#0b1220;
-    --card:#141f33;
-    --card-border:#25314a;
-    --text:#eef2f8;
-    --text-dim:#9fb0c8;
-    --accent:#3fa9f5;
-    --accent-2:#38d39f;
-    --warn:#f5a623;
-    --danger:#f5546a;
-    --input-bg:#0e1729;
+    --bg:#0a0e17;
+    --card:#131b2b;
+    --card-border:rgba(255,255,255,0.07);
+    --card-border-strong:rgba(255,255,255,0.16);
+    --text:#f1f5fb;
+    --text-dim:#93a3bd;
+    --text-faint:#5f7093;
+    --accent:#4c9eff;
+    --accent-soft:rgba(76,158,255,0.14);
+    --accent-2:#2fd8a6;
+    --accent-2-soft:rgba(47,216,166,0.13);
+    --warn:#f5b23f;
+    --warn-soft:rgba(245,178,63,0.14);
+    --danger:#ff6472;
+    --danger-soft:rgba(255,100,114,0.14);
+    --input-bg:rgba(255,255,255,0.035);
+    --input-border:rgba(255,255,255,0.09);
+    --shadow-card:0 1px 2px rgba(0,0,0,0.3), 0 14px 28px -16px rgba(0,0,0,0.6);
+    --radius-lg:16px;
+    --radius-md:11px;
+    --focus-ring:0 0 0 3px var(--accent-soft);
+    --select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%2393A3BD' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
   @media (prefers-color-scheme: light){
     :root{
-      --bg:#f4f6fa;
+      --bg:#f3f5f9;
       --card:#ffffff;
-      --card-border:#dbe2ee;
+      --card-border:rgba(16,24,39,0.08);
+      --card-border-strong:rgba(16,24,39,0.18);
       --text:#101827;
       --text-dim:#5b6b85;
+      --text-faint:#8b97ac;
       --accent:#1c7ed6;
+      --accent-soft:rgba(28,126,214,0.09);
       --accent-2:#0f9d6e;
-      --warn:#c97a0a;
+      --accent-2-soft:rgba(15,157,110,0.09);
+      --warn:#b3690a;
+      --warn-soft:rgba(179,105,10,0.1);
       --danger:#d1364b;
-      --input-bg:#f0f3f8;
+      --danger-soft:rgba(209,54,75,0.09);
+      --input-bg:#f5f7fb;
+      --input-border:rgba(16,24,39,0.1);
+      --shadow-card:0 1px 2px rgba(16,24,39,0.04), 0 14px 24px -18px rgba(16,24,39,0.2);
+      --select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%235B6B85' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     }
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
+  html{background:var(--bg);}
   body{
     background:var(--bg);
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    padding:16px 16px calc(40px + env(safe-area-inset-bottom));
+    padding:20px 16px calc(48px + env(safe-area-inset-bottom));
     max-width:560px;
     margin:0 auto;
+    -webkit-font-smoothing:antialiased;
   }
+  .header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .mark{
+    flex:none;
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:linear-gradient(155deg, var(--accent), var(--accent-2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 16px -6px rgba(76,158,255,0.55);
+  }
+  .mark svg{width:20px;height:20px;display:block;}
   h1{
-    font-size:1.4rem;
-    margin:8px 0 4px;
-    letter-spacing:0.02em;
+    font-size:1.375rem;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+    line-height:1.2;
   }
-  .subtitle{
+  .tagline{
+    color:var(--text-faint);
+    font-size:0.8rem;
+    font-weight:500;
+    margin:2px 0 0;
+  }
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:0 0 22px;
+  }
+  .chip{
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:0.01em;
     color:var(--text-dim);
-    font-size:0.9rem;
-    margin-bottom:20px;
+    background:var(--input-bg);
+    border:1px solid var(--card-border);
+    padding:4px 9px;
+    border-radius:100px;
+  }
+  .chip.offline{
+    color:var(--accent-2);
+    border-color:var(--accent-2-soft);
+    background:var(--accent-2-soft);
   }
   .card{
     background:var(--card);
     border:1px solid var(--card-border);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:16px;
+    border-radius:var(--radius-lg);
+    padding:18px 16px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow-card);
   }
   .card h2{
-    font-size:0.95rem;
+    font-size:0.8rem;
     text-transform:uppercase;
-    letter-spacing:0.06em;
+    letter-spacing:0.07em;
+    font-weight:700;
     color:var(--text-dim);
-    margin:0 0 14px;
+    margin:0 0 16px;
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:10px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--card-border);
   }
   .card h2 .num{
-    background:var(--accent);
-    color:#fff;
-    width:22px;
-    height:22px;
-    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent);
+    width:24px;
+    height:24px;
+    border-radius:8px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    font-size:0.8rem;
-    font-weight:700;
+    font-size:0.75rem;
+    font-weight:800;
+    flex:none;
   }
   label{
     display:block;
-    font-size:0.9rem;
+    font-size:0.83rem;
+    font-weight:600;
     color:var(--text-dim);
-    margin-bottom:6px;
+    margin-bottom:7px;
   }
   .field{
-    margin-bottom:14px;
+    margin-bottom:16px;
   }
   .field:last-child{margin-bottom:0;}
   input[type=text]{
     width:100%;
     background:var(--input-bg);
-    border:1px solid var(--card-border);
-    border-radius:10px;
-    padding:14px 12px;
-    font-size:1.15rem;
+    border:1px solid var(--input-border);
+    border-radius:var(--radius-md);
+    padding:13px 14px;
+    font-size:1.1rem;
+    font-weight:600;
     color:var(--text);
     outline:none;
     font-variant-numeric:tabular-nums;
+    transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+  }
+  input[type=text]::placeholder{
+    color:var(--text-faint);
+    font-weight:400;
+  }
+  @media (hover:hover){
+    input[type=text]:hover{border-color:var(--card-border-strong);}
   }
   input[type=text]:focus{
     border-color:var(--accent);
+    box-shadow:var(--focus-ring);
+    background:var(--card);
   }
   select{
     width:100%;
-    background:var(--input-bg);
-    border:1px solid var(--card-border);
-    border-radius:10px;
-    padding:14px 12px;
-    font-size:1.05rem;
+    background-color:var(--input-bg);
+    background-image:var(--select-chevron);
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    background-size:11px;
+    border:1px solid var(--input-border);
+    border-radius:var(--radius-md);
+    padding:13px 34px 13px 14px;
+    font-size:1rem;
+    font-weight:600;
     color:var(--text);
     outline:none;
     -webkit-appearance:none;
     appearance:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  @media (hover:hover){
+    select:hover{border-color:var(--card-border-strong);}
   }
   select:focus{
     border-color:var(--accent);
+    box-shadow:var(--focus-ring);
   }
   .row{
     display:flex;
     gap:12px;
   }
-  .row > .field{flex:1;}
+  .row > .field{flex:1;min-width:0;}
   .unit{
-    font-size:0.85rem;
-    color:var(--text-dim);
+    font-size:0.82rem;
+    color:var(--text-faint);
     margin-left:4px;
+    font-weight:500;
   }
   .result{
     background:var(--input-bg);
-    border-radius:10px;
-    padding:14px;
-    margin-top:6px;
+    border-radius:var(--radius-md);
+    padding:13px 14px;
+    margin-top:8px;
     display:flex;
     justify-content:space-between;
     align-items:baseline;
+    gap:10px;
+    transition:background-color .2s ease;
   }
   .result .label{
-    font-size:0.95rem;
+    font-size:0.88rem;
+    font-weight:500;
     color:var(--text-dim);
   }
   .result .value{
-    font-size:1.5rem;
+    font-size:1.45rem;
     font-weight:700;
     font-variant-numeric:tabular-nums;
+    letter-spacing:-0.01em;
+    white-space:nowrap;
+    transition:color .2s ease;
   }
   .result .value .unit{
-    font-size:0.9rem;
-    font-weight:400;
+    font-size:0.85rem;
+    font-weight:500;
   }
+  .result.primary{background:var(--accent-soft);}
   .result.primary .value{color:var(--accent);}
+  .result.secondary{background:var(--accent-2-soft);}
   .result.secondary .value{color:var(--accent-2);}
+  .result.danger{background:var(--danger-soft);}
   .result.danger .value{color:var(--danger);}
   .flag{
+    display:flex;
+    align-items:center;
+    gap:7px;
     font-size:0.8rem;
-    color:var(--warn);
-    margin-top:8px;
+    font-weight:600;
+    color:var(--danger);
+    margin-top:10px;
+    padding:9px 11px;
+    background:var(--danger-soft);
+    border-radius:9px;
   }
-  .flag.danger{color:var(--danger);}
+  .flag svg{flex:none;width:15px;height:15px;}
   .sync-note{
-    font-size:0.8rem;
-    color:var(--text-dim);
-    margin-top:6px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    font-size:0.78rem;
+    font-weight:500;
+    color:var(--warn);
+    margin-top:9px;
   }
   .sync-note button{
-    background:none;
-    border:none;
-    color:var(--accent);
-    font-size:0.8rem;
-    padding:0;
-    text-decoration:underline;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:var(--warn-soft);
+    border:1px solid transparent;
+    color:var(--warn);
+    font-size:0.78rem;
+    font-weight:600;
+    padding:6px 11px;
+    border-radius:100px;
     cursor:pointer;
+    transition:background-color .15s ease, color .15s ease;
   }
+  .sync-note button svg{width:12px;height:12px;flex:none;}
+  @media (hover:hover){
+    .sync-note button:hover{background:var(--warn);color:#20150a;}
+  }
+  .sync-note button:active{transform:scale(0.97);}
   details{
-    margin-top:6px;
+    margin-top:10px;
   }
   summary{
-    color:var(--text-dim);
-    font-size:0.85rem;
+    color:var(--text-faint);
+    font-size:0.82rem;
+    font-weight:600;
     cursor:pointer;
+    list-style:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
   }
+  summary::-webkit-details-marker{display:none;}
+  summary::before{
+    content:"";
+    width:0;
+    height:0;
+    border-left:4px solid transparent;
+    border-right:4px solid transparent;
+    border-top:5px solid var(--text-faint);
+    transition:transform .15s ease;
+  }
+  details[open] summary::before{transform:rotate(180deg);}
   .formula{
-    font-size:0.85rem;
+    font-size:0.83rem;
     color:var(--text-dim);
-    margin-top:8px;
-    line-height:1.5;
+    margin-top:10px;
+    line-height:1.6;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:var(--input-bg);
+    border-radius:9px;
+    padding:10px 12px;
   }
   .reset{
     display:block;
     width:100%;
-    padding:14px;
-    background:none;
+    padding:15px;
+    background:var(--card);
     border:1px solid var(--card-border);
-    border-radius:10px;
+    border-radius:var(--radius-md);
     color:var(--text-dim);
-    font-size:1rem;
-    margin-top:4px;
+    font-weight:600;
+    font-size:0.95rem;
+    margin-top:6px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  @media (hover:hover){
+    .reset:hover{border-color:var(--danger);color:var(--danger);}
+  }
+  .reset:active{transform:scale(0.99);}
+  button:focus-visible, summary:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
   }
   footer{
     text-align:center;
-    color:var(--text-dim);
-    font-size:0.78rem;
-    margin-top:24px;
-    line-height:1.5;
+    color:var(--text-faint);
+    font-size:0.76rem;
+    margin-top:26px;
+    line-height:1.6;
+    padding:0 8px;
   }
 </style>
 </head>
 <body>
 
-<h1>Perfusionsrechner</h1>
-<div class="subtitle">BSA · Flow · DO2 · Priming · Katecholamine · mmHg/kPa — offline</div>
+<div class="header">
+  <div class="mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M12 3c3.5 4 6 7.2 6 10.2A6 6 0 1 1 6 13.2C6 10.2 8.5 7 12 3Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M7.3 14h2.1l1.3-2.4 1.7 3.7 1.1-1.8h2.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Perfusionsrechner</h1>
+    <p class="tagline">Rechenhilfe für den innerklinischen Gebrauch</p>
+  </div>
+</div>
+<div class="chips">
+  <span class="chip">BSA</span>
+  <span class="chip">Flow</span>
+  <span class="chip">DO2</span>
+  <span class="chip">Priming</span>
+  <span class="chip">Katecholamine</span>
+  <span class="chip">mmHg/kPa</span>
+  <span class="chip offline">Offline</span>
+</div>
 
 <div class="card">
   <h2><span class="num">1</span>Körperoberfläche (BSA)</h2>
@@ -293,8 +467,10 @@
   <div class="row">
     <div class="field">
       <label for="hb">Hb <span class="unit">g/dl</span></label>
-      <input type="text" inputmode="decimal" id="hb" placeholder="wird aus Abschnitt 1 übernommen">
-      <div class="sync-note" id="hb-sync-note" style="display:none">Manuell geändert. <button id="hb-sync-btn" type="button">↺ Ausgangs-Hb übernehmen</button></div>
+      <input type="text" inputmode="decimal" id="hb" placeholder="automatisch">
+      <div class="sync-note" id="hb-sync-note" style="display:none">Manuell geändert
+        <button id="hb-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Ausgangs-Hb übernehmen</button>
+      </div>
     </div>
     <div class="field">
       <label for="sao2">SaO2 <span class="unit">%</span></label>
@@ -303,8 +479,10 @@
   </div>
   <div class="field">
     <label for="flow">Pumpenfluss <span class="unit">l/min</span></label>
-    <input type="text" inputmode="decimal" id="flow" placeholder="wird aus Ziel-Flow übernommen">
-    <div class="sync-note" id="sync-note" style="display:none">Manuell geändert. <button id="sync-btn" type="button">↺ Ziel-Flow übernehmen</button></div>
+    <input type="text" inputmode="decimal" id="flow" placeholder="automatisch">
+    <div class="sync-note" id="sync-note" style="display:none">Manuell geändert
+      <button id="sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Ziel-Flow übernehmen</button>
+    </div>
   </div>
   <div class="result primary">
     <span class="label">DO2</span>
@@ -314,7 +492,10 @@
     <span class="label">DO2-Index</span>
     <span class="value" id="out-do2i">–<span class="unit">ml/min/m²</span></span>
   </div>
-  <div class="flag danger" id="do2i-flag" style="display:none">⚠ DO2-Index unter dem kritischen Bereich (~270 ml/min/m²)</div>
+  <div class="flag" id="do2i-flag" style="display:none">
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.6 14.9 13.4A1 1 0 0 1 14 15H2a1 1 0 0 1-.9-1.6L8 1.6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.3v3.4M8 12.1h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    DO2-Index unter dem kritischen Bereich (~270 ml/min/m²)
+  </div>
   <details>
     <summary>Formel</summary>
     <div class="formula">DO2 = Flow × Hb × 1,34 × SaO2 × 10<br>DO2-Index = DO2 / BSA</div>
@@ -325,8 +506,10 @@
   <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
-    <input type="text" inputmode="decimal" id="priming-weight" placeholder="wird aus Abschnitt 1 übernommen">
-    <div class="sync-note" id="priming-weight-sync-note" style="display:none">Manuell geändert. <button id="priming-weight-sync-btn" type="button">↺ Gewicht übernehmen</button></div>
+    <input type="text" inputmode="decimal" id="priming-weight" placeholder="automatisch">
+    <div class="sync-note" id="priming-weight-sync-note" style="display:none">Manuell geändert
+      <button id="priming-weight-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Gewicht übernehmen</button>
+    </div>
   </div>
   <div class="field">
     <label for="bv-factor">Blutvolumen-Faktor <span class="unit">ml/kg</span></label>
@@ -334,8 +517,10 @@
   </div>
   <div class="field">
     <label for="start-hb">Ausgangs-Hb <span class="unit">g/dl</span></label>
-    <input type="text" inputmode="decimal" id="start-hb" placeholder="wird aus Abschnitt 1 übernommen">
-    <div class="sync-note" id="start-hb-sync-note" style="display:none">Manuell geändert. <button id="start-hb-sync-btn" type="button">↺ Ausgangs-Hb übernehmen</button></div>
+    <input type="text" inputmode="decimal" id="start-hb" placeholder="automatisch">
+    <div class="sync-note" id="start-hb-sync-note" style="display:none">Manuell geändert
+      <button id="start-hb-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Ausgangs-Hb übernehmen</button>
+    </div>
   </div>
   <div class="field">
     <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
@@ -373,8 +558,10 @@
   </div>
   <div class="field">
     <label for="cat-weight">Patientengewicht <span class="unit">kg</span></label>
-    <input type="text" inputmode="decimal" id="cat-weight" placeholder="wird aus Abschnitt 1 übernommen">
-    <div class="sync-note" id="cat-weight-sync-note" style="display:none">Manuell geändert. <button id="cat-weight-sync-btn" type="button">↺ Gewicht übernehmen</button></div>
+    <input type="text" inputmode="decimal" id="cat-weight" placeholder="automatisch">
+    <div class="sync-note" id="cat-weight-sync-note" style="display:none">Manuell geändert
+      <button id="cat-weight-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Gewicht übernehmen</button>
+    </div>
   </div>
   <div class="result">
     <span class="label">Konzentration</span>
