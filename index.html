@@ -251,6 +251,11 @@
     margin-bottom:16px;
   }
   .field:last-child{margin-bottom:0;}
+  details + .field{
+    margin-top:20px;
+    padding-top:18px;
+    border-top:1px solid var(--card-border);
+  }
   input[type=text]{
     width:100%;
     background:var(--input-bg);
@@ -528,19 +533,18 @@
 
 <nav class="jumpnav" aria-label="Abschnitte">
   <a class="navchip" href="#section-1"><span class="num">1</span>BSA</a>
-  <a class="navchip" href="#section-2"><span class="num">2</span>Flow</a>
+  <a class="navchip" href="#section-2"><span class="num">2</span>DO2</a>
   <a class="navchip" href="#section-3"><span class="num">3</span>Custodiol</a>
-  <a class="navchip" href="#section-4"><span class="num">4</span>DO2</a>
-  <a class="navchip" href="#section-5"><span class="num">5</span>Priming</a>
-  <a class="navchip" href="#section-6"><span class="num">6</span>KOD</a>
-  <a class="navchip" href="#section-7"><span class="num">7</span>Katech.</a>
-  <a class="navchip" href="#section-8"><span class="num">8</span>mmHg/kPa</a>
+  <a class="navchip" href="#section-4"><span class="num">4</span>Priming</a>
+  <a class="navchip" href="#section-5"><span class="num">5</span>KOD</a>
+  <a class="navchip" href="#section-6"><span class="num">6</span>Katech.</a>
+  <a class="navchip" href="#section-7"><span class="num">7</span>mmHg/kPa</a>
 </nav>
 
 <button class="reset" id="reset-btn" type="button">Alle Patientendaten zurücksetzen</button>
 
 <div class="card" id="section-1">
-  <h2><span class="num">1</span>Körperoberfläche (BSA)</h2>
+  <h2><span class="num">1</span>Körperoberfläche (BSA) &amp; Ziel-Pumpenfluss</h2>
   <div class="row">
     <div class="field">
       <label for="height">Größe <span class="unit">cm</span></label>
@@ -563,10 +567,6 @@
     <summary>Formel</summary>
     <div class="formula">BSA = 0,007184 × Gewicht<sup>0,425</sup> × Größe<sup>0,725</sup></div>
   </details>
-</div>
-
-<div class="card" id="section-2">
-  <h2><span class="num">2</span>Ziel-Pumpenfluss</h2>
   <div class="field">
     <label for="ci">Cardiac Index <span class="unit">l/min/m²</span></label>
     <input type="text" inputmode="decimal" id="ci" placeholder="automatisch">
@@ -584,36 +584,8 @@
   </details>
 </div>
 
-<div class="card" id="section-3">
-  <h2><span class="num">3</span>Organentnahme Custodiol</h2>
-  <div class="field">
-    <label for="custodiol-age">Alter (Spender)</label>
-    <select id="custodiol-age">
-      <option value="3">Bis 1,5 Jahre (CI 3,0)</option>
-      <option value="2.7">1,5 – 3 Jahre (CI 2,7)</option>
-      <option value="2.4" selected>Über 3 Jahre (CI 2,4)</option>
-    </select>
-  </div>
-  <div class="result">
-    <span class="label">HZV (errechnet)</span>
-    <span class="value" id="out-custodiol-hzv">–<span class="unit">l/min</span></span>
-  </div>
-  <div class="result primary">
-    <span class="label">Perfusionsmenge max.</span>
-    <span class="value" id="out-custodiol-max">–<span class="unit">ml</span></span>
-  </div>
-  <div class="result secondary">
-    <span class="label">Perfusionsmenge min.</span>
-    <span class="value" id="out-custodiol-min">–<span class="unit">ml</span></span>
-  </div>
-  <details>
-    <summary>Formel</summary>
-    <div class="formula">HZV = CI (nach Alter) × BSA (HZV für Herz)<br>Perfusionsmenge max. = HZV × 1000 × 9 min × 0,1<br>Perfusionsmenge min. = Perfusionsmenge max. × 0,8</div>
-  </details>
-</div>
-
-<div class="card" id="section-4">
-  <h2><span class="num">4</span>Sauerstoffangebot (DO2)</h2>
+<div class="card" id="section-2">
+  <h2><span class="num">2</span>Sauerstoffangebot (DO2)</h2>
   <div class="row">
     <div class="field">
       <label for="hb">Hb <span class="unit">g/dl</span></label>
@@ -652,8 +624,36 @@
   </details>
 </div>
 
-<div class="card" id="section-5">
-  <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
+<div class="card" id="section-3">
+  <h2><span class="num">3</span>Organentnahme Custodiol</h2>
+  <div class="field">
+    <label for="custodiol-age">Alter (Spender)</label>
+    <select id="custodiol-age">
+      <option value="3">Bis 1,5 Jahre (CI 3,0)</option>
+      <option value="2.7">1,5 – 3 Jahre (CI 2,7)</option>
+      <option value="2.4" selected>Über 3 Jahre (CI 2,4)</option>
+    </select>
+  </div>
+  <div class="result">
+    <span class="label">HZV (errechnet)</span>
+    <span class="value" id="out-custodiol-hzv">–<span class="unit">l/min</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Perfusionsmenge max.</span>
+    <span class="value" id="out-custodiol-max">–<span class="unit">ml</span></span>
+  </div>
+  <div class="result secondary">
+    <span class="label">Perfusionsmenge min.</span>
+    <span class="value" id="out-custodiol-min">–<span class="unit">ml</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">HZV = CI (nach Alter) × BSA (HZV für Herz)<br>Perfusionsmenge max. = HZV × 1000 × 9 min × 0,1<br>Perfusionsmenge min. = Perfusionsmenge max. × 0,8</div>
+  </details>
+</div>
+
+<div class="card" id="section-4">
+  <h2><span class="num">4</span>Priming-Volumen (erwarteter Hb)</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="priming-weight" placeholder="automatisch">
@@ -690,8 +690,8 @@
   </details>
 </div>
 
-<div class="card" id="section-6">
-  <h2><span class="num">6</span>Kolloidosmotischer Druck (KOD)</h2>
+<div class="card" id="section-5">
+  <h2><span class="num">5</span>Kolloidosmotischer Druck (KOD)</h2>
   <div class="field">
     <label for="kod-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="kod-weight" placeholder="automatisch">
@@ -744,8 +744,8 @@
   </details>
 </div>
 
-<div class="card" id="section-7">
-  <h2><span class="num">7</span>Katecholamine</h2>
+<div class="card" id="section-6">
+  <h2><span class="num">6</span>Katecholamine</h2>
   <div class="row">
     <div class="field">
       <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
@@ -781,8 +781,8 @@
   </details>
 </div>
 
-<div class="card" id="section-8">
-  <h2><span class="num">8</span>mmHg ↔ kPa</h2>
+<div class="card" id="section-7">
+  <h2><span class="num">7</span>mmHg ↔ kPa</h2>
   <div class="row">
     <div class="field">
       <label for="mmhg">Druck <span class="unit">mmHg</span></label>
