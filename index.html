@@ -578,6 +578,14 @@
     <span class="label">Ziel-Flow</span>
     <span class="value" id="out-flow">–<span class="unit">l/min</span></span>
   </div>
+  <div class="result secondary">
+    <span class="label">Erwarteter Hb</span>
+    <span class="value" id="out-flow-hb">–<span class="unit">g/dl</span></span>
+  </div>
+  <div class="result secondary">
+    <span class="label">Priming-Volumen</span>
+    <span class="value" id="out-flow-priming">–<span class="unit">ml</span></span>
+  </div>
   <details>
     <summary>Formel</summary>
     <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA</div>
@@ -674,7 +682,7 @@
   </div>
   <div class="field">
     <label for="priming-vol">Priming-Volumen <span class="unit">ml</span></label>
-    <input type="text" inputmode="decimal" id="priming-vol" placeholder="z. B. 1400">
+    <input type="text" inputmode="decimal" id="priming-vol" value="1250" placeholder="z. B. 1250">
   </div>
   <div class="result">
     <span class="label">Geschätztes Blutvolumen</span>
@@ -966,6 +974,8 @@
     }
     $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
     $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
+    $('out-flow-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
+    $('out-flow-priming').innerHTML = (isFinite(primingVol) ? fmt(primingVol,0) : '–') + '<span class="unit">ml</span>';
 
     // 5: Kolloidosmotischer Druck (KOD)
     kodWeightLink.set(weight, 0);
@@ -1064,7 +1074,7 @@
     bvFactorEl.value = '70';
     startHbEl.value = '';
     startHbLink.reset();
-    primingVolEl.value = '';
+    primingVolEl.value = '1250';
     kodWeightEl.value = '';
     kodWeightLink.reset();
     kodBvFactorEl.value = '70';
@@ -1087,7 +1097,7 @@
   // Letzte Werte aus dem vorherigen Aufruf wiederherstellen
   persistedIds.forEach(function(id){
     const stored = storageGet(STORAGE_PREFIX + id);
-    if(stored !== null){
+    if(stored !== null && !(id === 'priming-vol' && stored === '')){
       $(id).value = stored;
     }
   });
