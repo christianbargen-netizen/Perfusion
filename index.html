@@ -587,8 +587,16 @@
     <input type="text" inputmode="decimal" id="flow-top" placeholder="automatisch">
   </div>
   <div class="field">
+    <label for="sao2-top">SaO2 <span class="unit">%</span></label>
+    <input type="text" inputmode="decimal" id="sao2-top" value="100">
+  </div>
+  <div class="field">
     <label for="priming-top">Priming-Volumen <span class="unit">ml</span></label>
     <input type="text" inputmode="decimal" id="priming-top" placeholder="z. B. 1250">
+  </div>
+  <div class="result secondary">
+    <span class="label">Aktuelles DO2</span>
+    <span class="value" id="out-flow-do2">–<span class="unit">ml/min</span></span>
   </div>
   <details>
     <summary>Formel</summary>
@@ -608,7 +616,7 @@
     </div>
     <div class="field">
       <label for="sao2">SaO2 <span class="unit">%</span></label>
-      <input type="text" inputmode="decimal" id="sao2" value="98">
+      <input type="text" inputmode="decimal" id="sao2" value="100">
     </div>
   </div>
   <div class="field">
@@ -979,7 +987,8 @@
     $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
     $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
     $('out-flow-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
-    [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+    $('out-flow-do2').innerHTML = (isFinite(do2) ? fmt(do2,0) : '–') + '<span class="unit">ml/min</span>';
+    [['flow-top', flowEl], ['sao2-top', sao2El], ['priming-top', primingVolEl]].forEach(function(p){
       const top = $(p[0]);
       if(document.activeElement !== top) top.value = p[1].value;
     });
@@ -1048,7 +1057,7 @@
 
   [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   // Felder in Abschnitt 1 spiegeln Pumpenfluss (2) und Priming-Volumen (4)
-  [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+  [['flow-top', flowEl], ['sao2-top', sao2El], ['priming-top', primingVolEl]].forEach(function(p){
     $(p[0]).addEventListener('input', function(){
       p[1].value = $(p[0]).value;
       p[1].dispatchEvent(new Event('input'));
@@ -1080,7 +1089,7 @@
     custodiolAgeEl.value = '2.4';
     hbEl.value = '';
     hbLink.reset();
-    sao2El.value = '98';
+    sao2El.value = '100';
     flowEl.value = '';
     flowLink.reset();
     primingWeightEl.value = '';
@@ -1111,7 +1120,7 @@
   // Letzte Werte aus dem vorherigen Aufruf wiederherstellen
   persistedIds.forEach(function(id){
     const stored = storageGet(STORAGE_PREFIX + id);
-    if(stored !== null && !(id === 'priming-vol' && stored === '')){
+    if(stored !== null && !(id === 'priming-vol' && stored === '') && !(id === 'sao2' && stored === '98')){
       $(id).value = stored;
     }
   });
