@@ -582,9 +582,13 @@
     <span class="label">Erwarteter Hb</span>
     <span class="value" id="out-flow-hb">–<span class="unit">g/dl</span></span>
   </div>
-  <div class="result secondary">
-    <span class="label">Priming-Volumen</span>
-    <span class="value" id="out-flow-priming">–<span class="unit">ml</span></span>
+  <div class="field">
+    <label for="flow-top">Aktueller Fluss <span class="unit">l/min</span></label>
+    <input type="text" inputmode="decimal" id="flow-top" placeholder="automatisch">
+  </div>
+  <div class="field">
+    <label for="priming-top">Priming-Volumen <span class="unit">ml</span></label>
+    <input type="text" inputmode="decimal" id="priming-top" placeholder="z. B. 1250">
   </div>
   <details>
     <summary>Formel</summary>
@@ -975,7 +979,10 @@
     $('out-ebv').innerHTML = (isFinite(ebv) ? fmt(ebv,0) : '–') + '<span class="unit">ml</span>';
     $('out-priming-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
     $('out-flow-hb').innerHTML = (isFinite(expectedHb) ? fmt(expectedHb,1) : '–') + '<span class="unit">g/dl</span>';
-    $('out-flow-priming').innerHTML = (isFinite(primingVol) ? fmt(primingVol,0) : '–') + '<span class="unit">ml</span>';
+    [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+      const top = $(p[0]);
+      if(document.activeElement !== top) top.value = p[1].value;
+    });
 
     // 5: Kolloidosmotischer Druck (KOD)
     kodWeightLink.set(weight, 0);
@@ -1040,6 +1047,13 @@
   }
 
   [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
+  // Felder in Abschnitt 1 spiegeln Pumpenfluss (2) und Priming-Volumen (4)
+  [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+    $(p[0]).addEventListener('input', function(){
+      p[1].value = $(p[0]).value;
+      p[1].dispatchEvent(new Event('input'));
+    });
+  });
   custodiolAgeEl.addEventListener('change', calc);
   sao2El.addEventListener('input', calc);
   [bvFactorEl, primingVolEl].forEach(el => el.addEventListener('input', calc));
