@@ -527,7 +527,7 @@
   </div>
   <div class="header-text">
     <h1>Perfusionsrechner</h1>
-    <p class="tagline">Rechenhilfe für den innerklinischen Gebrauch</p>
+    <p class="tagline">Nicht für die innerklinische Berechnung zugelassen</p>
   </div>
   <span class="chip offline">Offline</span>
 </div>
@@ -582,6 +582,10 @@
     <label for="flow-top">Aktueller Flow <span class="unit">l/min</span></label>
     <input type="text" inputmode="decimal" id="flow-top" placeholder="automatisch">
   </div>
+  <div class="field">
+    <label for="hb-top">Aktueller Hb <span class="unit">g/dl</span></label>
+    <input type="text" inputmode="decimal" id="hb-top" placeholder="automatisch">
+  </div>
   <div class="result secondary" id="flow-do2i-result">
     <span class="label">DO2i</span>
     <span class="value" id="out-flow-do2i">–<span class="unit">ml/min/m²</span></span>
@@ -596,7 +600,7 @@
   </div>
   <details>
     <summary>Formel</summary>
-    <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA<br>DO2i = Flow × Hb × 1,34 × SaO2 × 10 / BSA (SaO2 aus Abschnitt 2)</div>
+    <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA<br>DO2i = aktueller Flow × aktueller Hb × 1,34 × SaO2 × 10 / BSA (SaO2 aus Abschnitt 2)</div>
   </details>
 </div>
 
@@ -762,7 +766,7 @@
 </div>
 
 <footer>
-  Reine Rechenhilfe für den innerklinischen Gebrauch.<br>
+  Nicht für die innerklinische Berechnung zugelassen.<br>
   Ersetzt nicht die klinische Beurteilung. Werte immer plausibilisieren.
 </footer>
 
@@ -927,7 +931,7 @@
     $('out-flow-do2i').innerHTML = (isFinite(do2i) ? fmt(do2i,0) : '–') + '<span class="unit">ml/min/m²</span>';
     $('flow-do2i-result').classList.toggle('secondary', !do2iCritical);
     $('flow-do2i-result').classList.toggle('danger', do2iCritical);
-    [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+    [['flow-top', flowEl], ['hb-top', hbEl], ['priming-top', primingVolEl]].forEach(function(p){
       const top = $(p[0]);
       if(document.activeElement !== top) top.value = p[1].value;
     });
@@ -953,7 +957,7 @@
 
   [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
   // Felder in Abschnitt 1 spiegeln Pumpenfluss (2) und Priming-Volumen (4)
-  [['flow-top', flowEl], ['priming-top', primingVolEl]].forEach(function(p){
+  [['flow-top', flowEl], ['hb-top', hbEl], ['priming-top', primingVolEl]].forEach(function(p){
     $(p[0]).addEventListener('input', function(){
       p[1].value = $(p[0]).value;
       p[1].dispatchEvent(new Event('input'));
