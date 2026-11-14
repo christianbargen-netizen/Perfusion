@@ -536,10 +536,10 @@
 
 <nav class="jumpnav" aria-label="Abschnitte">
   <a class="navchip" href="#section-1"><span class="num">1</span>BSA</a>
-  <a class="navchip" href="#section-2"><span class="num">2</span>DO2</a>
+  <a class="navchip" href="#section-2"><span class="num">2</span>Katech.</a>
   <a class="navchip" href="#section-3"><span class="num">3</span>Custodiol</a>
-  <a class="navchip" href="#section-4"><span class="num">4</span>Priming</a>
-  <a class="navchip" href="#section-5"><span class="num">5</span>Katech.</a>
+  <a class="navchip" href="#section-4"><span class="num">4</span>DO2</a>
+  <a class="navchip" href="#section-5"><span class="num">5</span>Priming</a>
   <a class="navchip" href="#section-6"><span class="num">6</span>mmHg/kPa</a>
 </nav>
 
@@ -602,12 +602,77 @@
   </div>
   <details>
     <summary>Formel</summary>
-    <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA<br>DO2i = aktueller Flow × aktueller Hb × 1,34 × SaO2 × 10 / BSA (SaO2 aus Abschnitt 2)</div>
+    <div class="formula">CI = altersabhängiger Wert aus Abschnitt 3 (manuell überschreibbar)<br>Flow = CI × BSA<br>DO2i = aktueller Flow × aktueller Hb × 1,34 × SaO2 × 10 / BSA (SaO2 aus Abschnitt 4)</div>
   </details>
 </div>
 
 <div class="card" id="section-2">
-  <h2><span class="num">2</span>Sauerstoffangebot (DO2)</h2>
+  <h2><span class="num">2</span>Katecholamine</h2>
+  <div class="row">
+    <div class="field">
+      <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
+      <input type="text" inputmode="decimal" id="cat-mg" placeholder="z. B. 5">
+    </div>
+    <div class="field">
+      <label for="cat-vol">Spritzenvolumen <span class="unit">ml</span></label>
+      <input type="text" inputmode="decimal" id="cat-vol" value="50">
+    </div>
+  </div>
+  <div class="field">
+    <label for="cat-rate">Laufrate <span class="unit">ml/h</span></label>
+    <input type="text" inputmode="decimal" id="cat-rate" placeholder="z. B. 3">
+  </div>
+  <div class="field">
+    <label for="cat-weight">Patientengewicht <span class="unit">kg</span></label>
+    <input type="text" inputmode="decimal" id="cat-weight" placeholder="automatisch">
+    <div class="sync-note" id="cat-weight-sync-note" style="display:none">Manuell geändert
+      <button id="cat-weight-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Gewicht übernehmen</button>
+    </div>
+  </div>
+  <div class="result">
+    <span class="label">Konzentration</span>
+    <span class="value" id="out-cat-conc">–<span class="unit">µg/ml</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Dosis</span>
+    <span class="value" id="out-cat-min">–<span class="unit">µg/kg/min</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">Konzentration = Wirkstoffmenge / Spritzenvolumen × 1000<br>Dosis µg/kg/min = (Laufrate × Konzentration / Gewicht) / 60</div>
+  </details>
+</div>
+
+<div class="card" id="section-3">
+  <h2><span class="num">3</span>Organentnahme Custodiol</h2>
+  <div class="field">
+    <label for="custodiol-age">Alter (Spender)</label>
+    <select id="custodiol-age">
+      <option value="3">Bis 1,5 Jahre (CI 3,0)</option>
+      <option value="2.7">1,5 – 3 Jahre (CI 2,7)</option>
+      <option value="2.4" selected>Über 3 Jahre (CI 2,4)</option>
+    </select>
+  </div>
+  <div class="result">
+    <span class="label">HZV (errechnet)</span>
+    <span class="value" id="out-custodiol-hzv">–<span class="unit">l/min</span></span>
+  </div>
+  <div class="result primary">
+    <span class="label">Perfusionsmenge max.</span>
+    <span class="value" id="out-custodiol-max">–<span class="unit">ml</span></span>
+  </div>
+  <div class="result secondary">
+    <span class="label">Perfusionsmenge min.</span>
+    <span class="value" id="out-custodiol-min">–<span class="unit">ml</span></span>
+  </div>
+  <details>
+    <summary>Formel</summary>
+    <div class="formula">HZV = CI (nach Alter) × BSA (HZV für Herz)<br>Perfusionsmenge max. = HZV × 1000 × 9 min × 0,1<br>Perfusionsmenge min. = Perfusionsmenge max. × 0,8</div>
+  </details>
+</div>
+
+<div class="card" id="section-4">
+  <h2><span class="num">4</span>Sauerstoffangebot (DO2)</h2>
   <div class="row">
     <div class="field">
       <label for="hb">Hb <span class="unit">g/dl</span></label>
@@ -646,36 +711,8 @@
   </details>
 </div>
 
-<div class="card" id="section-3">
-  <h2><span class="num">3</span>Organentnahme Custodiol</h2>
-  <div class="field">
-    <label for="custodiol-age">Alter (Spender)</label>
-    <select id="custodiol-age">
-      <option value="3">Bis 1,5 Jahre (CI 3,0)</option>
-      <option value="2.7">1,5 – 3 Jahre (CI 2,7)</option>
-      <option value="2.4" selected>Über 3 Jahre (CI 2,4)</option>
-    </select>
-  </div>
-  <div class="result">
-    <span class="label">HZV (errechnet)</span>
-    <span class="value" id="out-custodiol-hzv">–<span class="unit">l/min</span></span>
-  </div>
-  <div class="result primary">
-    <span class="label">Perfusionsmenge max.</span>
-    <span class="value" id="out-custodiol-max">–<span class="unit">ml</span></span>
-  </div>
-  <div class="result secondary">
-    <span class="label">Perfusionsmenge min.</span>
-    <span class="value" id="out-custodiol-min">–<span class="unit">ml</span></span>
-  </div>
-  <details>
-    <summary>Formel</summary>
-    <div class="formula">HZV = CI (nach Alter) × BSA (HZV für Herz)<br>Perfusionsmenge max. = HZV × 1000 × 9 min × 0,1<br>Perfusionsmenge min. = Perfusionsmenge max. × 0,8</div>
-  </details>
-</div>
-
-<div class="card" id="section-4">
-  <h2><span class="num">4</span>Priming-Volumen (erwarteter Hb)</h2>
+<div class="card" id="section-5">
+  <h2><span class="num">5</span>Priming-Volumen (erwarteter Hb)</h2>
   <div class="field">
     <label for="priming-weight">Patientengewicht <span class="unit">kg</span></label>
     <input type="text" inputmode="decimal" id="priming-weight" placeholder="automatisch">
@@ -709,43 +746,6 @@
   <details>
     <summary>Formel</summary>
     <div class="formula">Blutvolumen (EBV) = Gewicht × Blutvolumen-Faktor<br>Erwarteter Hb = (EBV × Ausgangs-Hb) / (EBV + Priming-Volumen)</div>
-  </details>
-</div>
-
-<div class="card" id="section-5">
-  <h2><span class="num">5</span>Katecholamine</h2>
-  <div class="row">
-    <div class="field">
-      <label for="cat-mg">Wirkstoffmenge <span class="unit">mg</span></label>
-      <input type="text" inputmode="decimal" id="cat-mg" placeholder="z. B. 5">
-    </div>
-    <div class="field">
-      <label for="cat-vol">Spritzenvolumen <span class="unit">ml</span></label>
-      <input type="text" inputmode="decimal" id="cat-vol" value="50">
-    </div>
-  </div>
-  <div class="field">
-    <label for="cat-rate">Laufrate <span class="unit">ml/h</span></label>
-    <input type="text" inputmode="decimal" id="cat-rate" placeholder="z. B. 3">
-  </div>
-  <div class="field">
-    <label for="cat-weight">Patientengewicht <span class="unit">kg</span></label>
-    <input type="text" inputmode="decimal" id="cat-weight" placeholder="automatisch">
-    <div class="sync-note" id="cat-weight-sync-note" style="display:none">Manuell geändert
-      <button id="cat-weight-sync-btn" type="button"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 8V4.2M13.5 8H9.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Gewicht übernehmen</button>
-    </div>
-  </div>
-  <div class="result">
-    <span class="label">Konzentration</span>
-    <span class="value" id="out-cat-conc">–<span class="unit">µg/ml</span></span>
-  </div>
-  <div class="result primary">
-    <span class="label">Dosis</span>
-    <span class="value" id="out-cat-min">–<span class="unit">µg/kg/min</span></span>
-  </div>
-  <details>
-    <summary>Formel</summary>
-    <div class="formula">Konzentration = Wirkstoffmenge / Spritzenvolumen × 1000<br>Dosis µg/kg/min = (Laufrate × Konzentration / Gewicht) / 60</div>
   </details>
 </div>
 
@@ -958,7 +958,7 @@
   }
 
   [heightEl, weightEl, baseHbEl].forEach(el => el.addEventListener('input', calc));
-  // Felder in Abschnitt 1 spiegeln Pumpenfluss (2) und Priming-Volumen (4)
+  // Felder in Abschnitt 1 spiegeln Pumpenfluss (4) und Priming-Volumen (5)
   [['flow-top', flowEl], ['hb-top', hbEl], ['priming-top', primingVolEl]].forEach(function(p){
     $(p[0]).addEventListener('input', function(){
       p[1].value = $(p[0]).value;
